@@ -40,10 +40,10 @@ args = parser.parse_args()
 
 fin_name = "demo.bin"
 fout_name = "demo.csv"
-# if args.i != None:
-#     fin_name = args.i
-# if args.o != None:
-#     fout_name = args.o
+if args.i != None:
+    fin_name = args.i
+if args.o != None:
+    fout_name = args.o
 
 
 ########################################################################################################################
@@ -61,8 +61,7 @@ R = robjects.r
 
 R('library("GENEAread")')
 # From the GENEAread library we will use read.bin to process the *.bin file.
-print(f'x = read.bin( "{fin_name}" )')
-R(f'x = read.bin( "demo.bin" )')
+R(f'x = read.bin( "{fin_name}" )')
 # We can choose to directly save the generated table from R but I have chosen to
 ## process it further using pandas' dataframe.
 #R(f'write.table( x$data.out[,c("timestamp","x","y","z")], file="{out_file}", sep=",", row.names=FALSE )')
