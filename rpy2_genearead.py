@@ -12,7 +12,7 @@
 /// ## [2] https://cran.r-project.org/web/packages/GENEAread/index.html
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// @notes
-/// ## You will need to have R installed on your computer
+/// ## You will need to have R installed on your computer and is in your PATH
 /// ## You will need the following libraries
 /// #### > pip install tzlocal
 /// #### > pip install rpy2
@@ -62,17 +62,18 @@ R = robjects.r
 R('library("GENEAread")')
 # From the GENEAread library we will use read.bin to process the *.bin file.
 R(f'x = read.bin( "{fin_name}" )')
-# We can choose to directly save the generated table from R but I have chosen to
-## process it further using pandas' dataframe.
-#R(f'write.table( x$data.out[,c("timestamp","x","y","z")], file="{out_file}", sep=",", row.names=FALSE )')
 
 
 ########################################################################################################################
 ##### RPy2 Conversion and Pandas Processing ############################################################################
 ########################################################################################################################
-
-# We only care about the timestamp and x,y,z
-df = pd.DataFrame(pandas2ri.ri2py(R.x[0])[:,:4])
+# The pandas2ri.ri2py does not work on all machines, so it is put in a try-except
+try: # to use pandas2ri.ri2py
+    # We only care about the timestamp and x,y,z
+    df = pd.DataFrame(pandas2ri.ri2py(R.x[0])[:,:4])
+except: # we need to save the data from R then open it in Python
+    R(f'write.table( x$data.out[,c("timestamp","x","y","z")], file="{fout_name}", sep=",", row.names=FALSE )')
+    df = pd.read_csv(f"{fout_name}", header=0, index_col=None)
 # Rename the columns, they are defaulted to 0,1,2,3,...
 df.columns = ["timestamp","x","y","z"]
 # The converted timestamp if in a decimal seconds; hence, by multiplying the time stamp by
